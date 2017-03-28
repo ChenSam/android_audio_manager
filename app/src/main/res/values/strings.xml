@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">AudioManager</string>
+    <string name="title_property">AudioManager Property</string>
+</resources>
