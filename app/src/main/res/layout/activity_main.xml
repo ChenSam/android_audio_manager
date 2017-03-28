@@ -166,4 +166,11 @@
         android:text="Force route to Earpiece"
         android:onClick="onCheckboxClicked"
         />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Set Music Vol to 11"
+        android:onClick="onButtonClicked"
+        android:id="@+id/btn_setMusicVol"/>
+
 </LinearLayout>

@@ -1,4 +1,4 @@
-package furtureisnow.dumpaudioprop;
+package furtureisnow.audio_manager;
 
 import android.content.Context;
 import android.database.ContentObserver;
@@ -70,11 +70,14 @@ public class MainActivity extends AppCompatActivity {
         if (state) {
             mAm.setMode(AudioManager.MODE_IN_COMMUNICATION);
             mAm.setSpeakerphoneOn(false);
-            tDevices.setText("" + mAm.getMode());
+            tDevices.setText("Audio Mode  = " + mAm.getMode());
         } else {
             mAm.setMode(AudioManager.MODE_NORMAL);
-            tDevices.setText("" + mAm.getMode());
+            tDevices.setText("Audio Mode = " + mAm.getMode());
         }
+    }
+    public void onButtonClicked(View view){
+        mAm.setStreamVolume(AudioManager.STREAM_MUSIC, 11, AudioManager.FLAG_SHOW_UI);
     }
     public void onCheckboxClicked(View view) {
         // Is the view now checked?
