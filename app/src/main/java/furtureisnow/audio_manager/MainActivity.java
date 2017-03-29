@@ -1,6 +1,9 @@
 package furtureisnow.audio_manager;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
@@ -38,11 +41,17 @@ public class MainActivity extends AppCompatActivity {
                 (TextView) findViewById(R.id.tSAMPLE_RATE);
         tStream = (TextView) findViewById(R.id.tMUSIC);
         tDevices = (TextView) findViewById(R.id.text_devices);
+        tHeadset = (TextView) findViewById(R.id.text_headset);
 
         //Register setting content observer
         this.getApplicationContext().getContentResolver()
                 .registerContentObserver(Settings.System.CONTENT_URI, true,
                         new SettingObserver(new Handler()));
+
+        //Register intent for HEADSET PLUG
+        this.getApplicationContext()
+                .registerReceiver(headsetReceiver,
+                        new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 
         // String to store property results
         mDutProperties = new String [Prop.NUM_PROP.ordinal()];
@@ -66,14 +75,46 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
     }
+    private final BroadcastReceiver headsetReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+                parseHeadset();
+        }
+    };
+    private void parseHeadset() {
+        mAudioDeviceInfo = mAm.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+        String temp = new String();
+        for (int i = 0; i < mAudioDeviceInfo.length; i++) {
+            boolean found = false;
+            switch (mAudioDeviceInfo[i].getType()) {
+                case AudioDeviceInfo.TYPE_LINE_ANALOG:
+                    temp = "LINEOUT";
+                    found = true;
+                    break;
+                case AudioDeviceInfo.TYPE_WIRED_HEADPHONES:
+                    temp = "HEADPHONES";
+                    found = true;
+                    break;
+                case AudioDeviceInfo.TYPE_WIRED_HEADSET:
+                    temp = "HEADSET";
+                    found = true;
+                    break;
+                default:
+                    temp = "No device";
+                    break;
+            }
+            if (found)
+                break;
+        }
+
+        tHeadset.setText("Audio Jack devices  = " + temp);
+    }
     private void route_to_earpiece(boolean state){
         if (state) {
             mAm.setMode(AudioManager.MODE_IN_COMMUNICATION);
             mAm.setSpeakerphoneOn(false);
-            tDevices.setText("Audio Mode  = " + mAm.getMode());
         } else {
             mAm.setMode(AudioManager.MODE_NORMAL);
-            tDevices.setText("Audio Mode = " + mAm.getMode());
         }
     }
     public void onButtonClicked(View view){
@@ -130,6 +171,9 @@ public class MainActivity extends AppCompatActivity {
         tStream.setText("" + am.getStreamVolume(AudioManager.STREAM_MUSIC));
     }
 
+    private void loadAudioMode() {
+        tDevices.setText("Audio Mode  = " + mAm.getMode());
+    }
     class SettingObserver extends ContentObserver {
         /**
          * Creates a content observer.
@@ -142,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
         public void onChange(boolean selfChange) {
             super.onChange(selfChange);
             loadStreamVol(mAm);
+            loadAudioMode();
         }
     }
 
@@ -168,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tProp[];
     private TextView tStream;
     private TextView tDevices;
+    private TextView tHeadset;
     private static final String TAG = "dumpAudioProp";
     private String mDutProperties [];
     private AudioManager mAm;
